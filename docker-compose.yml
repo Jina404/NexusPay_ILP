@@ -1,0 +1,34 @@
+# NexusPay stack: Rafiki + ASE bridge API
+# Start Rafiki first: cd rafiki && pnpm localenv:compose up
+# Then: docker compose up nexuspay-api
+
+services:
+  nexuspay-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    hostname: nexuspay-api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      RAFIKI_GRAPHQL_URL: http://host.docker.internal:3001/graphql
+      RAFIKI_WEBHOOK_URL: http://nexuspay-api:3000/webhooks
+      MPESA_CALLBACK_URL: ${MPESA_CALLBACK_URL}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+# Rafiki localenv override instructions:
+# After starting rafiki localenv (cloud-nine-wallet), set in rafiki backend:
+#   WEBHOOK_URL=http://host.docker.internal:3000/webhooks
+#   EXCHANGE_RATES_URL=http://host.docker.internal:3000/rates
+# Or run NexusPay API on host network alongside Rafiki.

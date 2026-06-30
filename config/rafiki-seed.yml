@@ -1,0 +1,29 @@
+assets:
+  - code: KES
+    scale: 2
+    liquidity: 100000000
+    liquidityThreshold: 1000000
+peeringAsset: KES
+peers: []
+accounts: []
+fees:
+  - fixed: 0
+    basisPoints: 0
+    asset: KES
+    scale: 2
+rates:
+  KES:
+    UGX: 28.5
+    TZS: 18.2
+    USD: 0.0077
+  UGX:
+    KES: 0.035
+  TZS:
+    KES: 0.055
+tenants:
+  - publicName: NexusPay Kenya
+    apiSecret: iyIgCprjb9uL8wFckR+pLEkJWMB7FJhgkvqhTQR/964=
+    idpConsentUrl: http://localhost:3010/consent
+    idpSecret: 2pEcn2kkCclbOHQiGNEwhJ0rucATZhrA807HTm2rNXE=
+    walletAddressPrefix: http://localhost:3000
+    webhookUrl: http://host.docker.internal:3000/webhooks

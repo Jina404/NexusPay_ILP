@@ -1,0 +1,23 @@
+{
+  "name": "nexuspay",
+  "private": true,
+  "scripts": {
+    "preinstall": "node -e \"try{require('child_process').execSync('pnpm -v',{stdio:'pipe'})}catch(e){console.warn('\\npnpm not found. Run: npm install -g pnpm@9.15.0\\nOr use: npx pnpm@9.15.0 install\\n')}\"",
+    "build": "pnpm -r build",
+    "dev": "pnpm --parallel --filter @nexuspay/api --filter @nexuspay/web dev",
+    "dev:api": "pnpm --filter @nexuspay/api dev",
+    "dev:web": "pnpm --filter @nexuspay/web dev",
+    "seed:rafiki": "tsx scripts/rafiki-seed.ts",
+    "reconcile": "pnpm --filter @nexuspay/api reconcile",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

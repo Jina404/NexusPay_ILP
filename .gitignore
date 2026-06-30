@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.next/
+.env
+.env.local
+*.log
+.DS_Store
+_mockup_tmp/
+_mockup_tmp.zip
+.turbo/

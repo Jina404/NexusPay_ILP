@@ -1,0 +1,166 @@
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+@import '@fontsource/dm-sans/400.css';
+@import '@fontsource/dm-sans/500.css';
+@import '@fontsource/dm-sans/600.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #eef1f6;
+  --canvas-base: #eef1f6;
+  --surface: #ffffff;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --accent: #00b86b;
+  --accent-light: #4dd998;
+  --accent-warm: #f59e0b;
+  --border: #e2e8f0;
+  --ring: rgba(0, 184, 107, 0.4);
+  --hero: #0b1120;
+  --hero-foreground: #f8fafc;
+  --hero-muted: #94a3b8;
+}
+
+@layer base {
+  html {
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply text-foreground font-sans antialiased;
+    background-color: var(--canvas-base);
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+}
+
+@layer utilities {
+  .premium-canvas {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .premium-canvas::before,
+  .premium-canvas::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .premium-canvas::before {
+    background-color: var(--canvas-base);
+    background-image:
+      radial-gradient(ellipse 80% 55% at 0% 0%, rgba(0, 184, 107, 0.07), transparent 58%),
+      radial-gradient(ellipse 70% 50% at 100% 100%, rgba(0, 184, 107, 0.05), transparent 52%),
+      radial-gradient(ellipse 55% 45% at 50% 0%, rgba(148, 163, 184, 0.12), transparent 62%),
+      linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+    background-attachment: scroll;
+  }
+
+  @media (min-width: 768px) {
+    .premium-canvas::before,
+    .premium-canvas::after {
+      background-attachment: fixed;
+    }
+  }
+
+  .premium-canvas::after {
+    background-image: radial-gradient(circle at center, rgba(15, 23, 42, 0.055) 0.6px, transparent 0.6px);
+    background-size: 20px 20px;
+    background-attachment: scroll;
+    opacity: 0.65;
+  }
+
+  .hero-canvas {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--canvas-base);
+  }
+
+  .hero-canvas::before,
+  .hero-canvas::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-canvas::before {
+    background-image:
+      radial-gradient(ellipse 80% 55% at 0% 0%, rgba(0, 184, 107, 0.07), transparent 58%),
+      radial-gradient(ellipse 70% 50% at 100% 100%, rgba(0, 184, 107, 0.05), transparent 52%),
+      radial-gradient(ellipse 55% 45% at 50% 0%, rgba(148, 163, 184, 0.12), transparent 62%),
+      linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+    mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+  }
+
+  .hero-canvas::after {
+    background-image: radial-gradient(circle at center, rgba(15, 23, 42, 0.055) 0.6px, transparent 0.6px);
+    background-size: 20px 20px;
+    opacity: 0.65;
+    mask-image: linear-gradient(to bottom, black 0%, black 68%, transparent 100%);
+  }
+
+  .section-pad {
+    @apply py-12 sm:py-16 lg:py-24;
+  }
+
+  .container-pad {
+    @apply px-4 sm:px-6;
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .text-gradient-hero {
+    color: #00b86b;
+    background: linear-gradient(135deg, #00b86b 0%, #4dd998 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-route {
+    stroke-dasharray: 5 9;
+    animation: hero-route-flow 5s linear infinite;
+  }
+
+  @keyframes hero-route-flow {
+    to {
+      stroke-dashoffset: -32;
+    }
+  }
+
+  .bg-hero-glow {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235, 0.25), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 50%, rgba(34, 211, 238, 0.08), transparent);
+  }
+}
