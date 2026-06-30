@@ -32,7 +32,7 @@ export default function MerchantPaymentsPage() {
   useEffect(() => {
     async function load() {
       const payments = await merchantApi.getPayments()
-      else setRows(payments)
+      if (payments) setRows(payments)
       setLoading(false)
     }
     void load()

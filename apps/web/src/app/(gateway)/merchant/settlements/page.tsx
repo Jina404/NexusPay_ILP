@@ -17,7 +17,7 @@ export default function MerchantSettlementsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getSettlements()
-      else setRows(data)
+      if (data) setRows(data)
       setLoading(false)
     }
     void load()

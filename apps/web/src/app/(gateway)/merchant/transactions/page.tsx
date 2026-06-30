@@ -20,7 +20,7 @@ export default function MerchantTransactionsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getTransactions()
-      else setRows(data)
+      if (data) setRows(data)
       setLoading(false)
     }
     void load()

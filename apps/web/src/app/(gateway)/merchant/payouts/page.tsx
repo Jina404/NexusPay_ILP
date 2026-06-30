@@ -29,7 +29,7 @@ export default function MerchantPayoutsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getPayouts()
-      else setRows(data)
+      if (data) setRows(data)
       setLoading(false)
     }
     void load()

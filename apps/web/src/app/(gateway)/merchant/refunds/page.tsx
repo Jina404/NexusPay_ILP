@@ -17,7 +17,7 @@ export default function MerchantRefundsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getRefunds()
-      else setRows(data)
+      if (data) setRows(data)
       setLoading(false)
     }
     void load()

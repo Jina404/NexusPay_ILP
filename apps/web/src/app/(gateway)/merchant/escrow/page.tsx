@@ -26,7 +26,7 @@ export default function MerchantEscrowPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getEscrows()
-      else setRows(data)
+      if (data) setRows(data)
       setLoading(false)
     }
     void load()

@@ -16,7 +16,7 @@ export default function MerchantWalletsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getWallets()
-      else setWallets(data)
+      if (data) setWallets(data)
       setLoading(false)
     }
     void load()

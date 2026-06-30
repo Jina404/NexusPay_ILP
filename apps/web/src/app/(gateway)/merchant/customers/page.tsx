@@ -18,7 +18,7 @@ export default function MerchantCustomersPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getCustomers()
-      else setRows(data)
+      if (data) setRows(data)
       setLoading(false)
     }
     void load()
