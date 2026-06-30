@@ -1,33 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PageHeader } from '@/components/page-header'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { LoadingState } from '@/components/merchant/api-key-banner'
+import { merchantApi, getStoredApiKey, setStoredApiKey } from '@/lib/merchant-api'
 import { cn } from '@/lib/utils'
 
 const sections = [
   { id: 'profile', label: 'Business profile' },
-  { id: 'team', label: 'Team members' },
-  { id: 'roles', label: 'Roles & permissions' },
-  { id: 'settlement', label: 'Settlement preferences' },
-  { id: 'security', label: 'Security' },
-  { id: 'notifications', label: 'Notifications' }
+  { id: 'security', label: 'Security' }
 ] as const
 
 export default function MerchantSettingsPage() {
   const [section, setSection] = useState<string>('profile')
-  const [businessName, setBusinessName] = useState('NexusPay Demo Merchant')
-  const [email, setEmail] = useState('merchant@example.com')
+  const [businessName, setBusinessName] = useState('')
+  const [email, setEmail] = useState('')
   const [settlementCurrency, setSettlementCurrency] = useState('KES')
-  const [twoFactor, setTwoFactor] = useState(false)
-  const [emailAlerts, setEmailAlerts] = useState(true)
+  const [apiKey, setApiKey] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      const merchant = await merchantApi.getMe()
+      if (merchant) {
+        setBusinessName(String(merchant.business_name ?? ''))
+        setEmail(String(merchant.email ?? ''))
+        setSettlementCurrency(String(merchant.settlement_currency ?? 'KES'))
+      }
+      setApiKey(getStoredApiKey() ?? '')
+      setLoading(false)
+    }
+    void load()
+  }, [])
+
+  if (loading) return <LoadingState />
 
   return (
     <div>
       <PageHeader
         title="Settings"
-        description="Business profile, team, settlement preferences, and security."
+        description="Business profile and API connection."
       />
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -55,84 +69,43 @@ export default function MerchantSettingsPage() {
               <h3 className="font-display font-semibold text-lg">Business profile</h3>
               <div>
                 <label className="text-sm text-muted block mb-1">Business name</label>
-                <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
+                <Input value={businessName} readOnly className="bg-background" />
               </div>
               <div>
                 <label className="text-sm text-muted block mb-1">Email</label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input type="email" value={email} readOnly className="bg-background" />
               </div>
-              <Button>Save changes</Button>
-            </div>
-          ) : null}
-
-          {section === 'team' ? (
-            <div>
-              <h3 className="font-display font-semibold text-lg mb-4">Team members</h3>
-              <p className="text-sm text-muted mb-4">Invite team members to manage your merchant account.</p>
-              <Button variant="outline" disabled>Invite member</Button>
-            </div>
-          ) : null}
-
-          {section === 'roles' ? (
-            <div>
-              <h3 className="font-display font-semibold text-lg mb-4">Roles & permissions</h3>
-              <ul className="text-sm space-y-2 text-muted">
-                <li><strong className="text-foreground">Owner</strong> — Full access</li>
-                <li><strong className="text-foreground">Admin</strong> — Payments, payouts, settings</li>
-                <li><strong className="text-foreground">Viewer</strong> — Read-only dashboard access</li>
-              </ul>
-            </div>
-          ) : null}
-
-          {section === 'settlement' ? (
-            <div className="space-y-4 max-w-md">
-              <h3 className="font-display font-semibold text-lg">Settlement preferences</h3>
               <div>
-                <label className="text-sm text-muted block mb-1">Default settlement currency</label>
-                <select
-                  value={settlementCurrency}
-                  onChange={(e) => setSettlementCurrency(e.target.value)}
-                  className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm"
-                >
-                  <option value="KES">KES</option>
-                  <option value="UGX">UGX</option>
-                  <option value="USD">USD</option>
-                  <option value="SSP">SSP</option>
-                </select>
+                <label className="text-sm text-muted block mb-1">Settlement currency</label>
+                <Input value={settlementCurrency} readOnly className="bg-background" />
               </div>
-              <Button>Save preferences</Button>
             </div>
           ) : null}
 
           {section === 'security' ? (
             <div className="space-y-4 max-w-md">
-              <h3 className="font-display font-semibold text-lg">Security</h3>
-              <label className="flex items-center gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  checked={twoFactor}
-                  onChange={(e) => setTwoFactor(e.target.checked)}
-                  className="rounded border-border"
-                />
-                Enable two-factor authentication
-              </label>
-              <Button variant="outline">Change password</Button>
-            </div>
-          ) : null}
-
-          {section === 'notifications' ? (
-            <div className="space-y-4 max-w-md">
-              <h3 className="font-display font-semibold text-lg">Notifications</h3>
-              <label className="flex items-center gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  checked={emailAlerts}
-                  onChange={(e) => setEmailAlerts(e.target.checked)}
-                  className="rounded border-border"
-                />
-                Email alerts for payments and settlements
-              </label>
-              <Button>Save preferences</Button>
+              <h3 className="font-display font-semibold text-lg">API key</h3>
+              <p className="text-sm text-muted">
+                Your API key connects this dashboard to live payment data. It is stored only in your
+                browser.
+              </p>
+              <Input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="np_live_..."
+                className="font-mono text-sm"
+              />
+              <Button
+                onClick={() => {
+                  const trimmed = apiKey.trim()
+                  if (!trimmed) return
+                  setStoredApiKey(trimmed)
+                  window.location.reload()
+                }}
+              >
+                Save API key
+              </Button>
             </div>
           ) : null}
         </div>

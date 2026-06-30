@@ -1,4 +1,19 @@
 import { getApiUrl } from '@/lib/supabase'
+import type {
+  ApiKeyRow,
+  ConversionRow,
+  CustomerRow,
+  DashboardCharts,
+  DashboardMetrics,
+  EscrowRow,
+  ExchangeRateRow,
+  PaymentRow,
+  PayoutRow,
+  RefundRow,
+  SettlementRow,
+  TransactionRow,
+  WalletRow
+} from '@/lib/merchant-types'
 
 const API_KEY_STORAGE = 'nexuspay_api_key'
 
@@ -9,6 +24,10 @@ export function getStoredApiKey(): string | null {
 
 export function setStoredApiKey(key: string) {
   localStorage.setItem(API_KEY_STORAGE, key)
+}
+
+export function clearStoredApiKey() {
+  localStorage.removeItem(API_KEY_STORAGE)
 }
 
 async function merchantFetch<T>(
@@ -35,15 +54,6 @@ async function merchantFetch<T>(
   } catch {
     return { data: null, error: 'Network error' }
   }
-}
-
-export interface MerchantStats {
-  totalVolume: number
-  totalRevenue: number
-  successfulPayments: number
-  failedPayments: number
-  pendingSettlements: number
-  walletBalanceTotal: number
 }
 
 export interface PaymentLinkRow {
@@ -81,18 +91,54 @@ export interface CreatePaymentLinkInput {
   expiresAt?: string
 }
 
+export interface CustomerDetail extends CustomerRow {
+  paymentHistory: Array<{
+    id: string
+    type: 'payment'
+    amount: number
+    currency: string
+    status: string
+    date: string
+  }>
+}
+
 export const merchantApi = {
   getMe: async () => (await merchantFetch<Record<string, unknown>>('/merchants/me')).data,
-  getStats: async () => (await merchantFetch<MerchantStats>('/merchants/me/stats')).data,
-  getPayments: async () => (await merchantFetch<unknown[]>('/merchants/me/payments')).data,
-  getTransactions: async () => (await merchantFetch<unknown[]>('/merchants/me/transactions')).data,
-  getWallets: async () => (await merchantFetch<unknown[]>('/merchants/me/wallets')).data,
-  getSettlements: async () => (await merchantFetch<unknown[]>('/merchants/me/settlements')).data,
-  getPayouts: async () => (await merchantFetch<unknown[]>('/merchants/me/payouts')).data,
-  getRefunds: async () => (await merchantFetch<unknown[]>('/merchants/me/refunds')).data,
-  getEscrows: async () => (await merchantFetch<unknown[]>('/merchants/me/escrows')).data,
-  getCustomers: async () => (await merchantFetch<unknown[]>('/merchants/me/customers')).data,
-  getApiKeys: async () => (await merchantFetch<unknown[]>('/merchants/me/api-keys')).data,
+  getStats: async () => (await merchantFetch<DashboardMetrics>('/merchants/me/stats')).data,
+  getDashboardCharts: async () =>
+    (await merchantFetch<DashboardCharts>('/merchants/me/dashboard-charts')).data,
+  getPayments: async () => (await merchantFetch<PaymentRow[]>('/merchants/me/payments')).data,
+  getTransactions: async () =>
+    (await merchantFetch<TransactionRow[]>('/merchants/me/transactions')).data,
+  getWallets: async () => (await merchantFetch<WalletRow[]>('/merchants/me/wallets')).data,
+  getSettlements: async () =>
+    (await merchantFetch<SettlementRow[]>('/merchants/me/settlements')).data,
+  getPayouts: async () => (await merchantFetch<PayoutRow[]>('/merchants/me/payouts')).data,
+  getRefunds: async () => (await merchantFetch<RefundRow[]>('/merchants/me/refunds')).data,
+  getEscrows: async () => (await merchantFetch<EscrowRow[]>('/merchants/me/escrows')).data,
+  getCustomers: async () => (await merchantFetch<CustomerRow[]>('/merchants/me/customers')).data,
+  getCustomer: async (id: string) => {
+    const result = await merchantFetch<CustomerDetail>(`/merchants/me/customers/${id}`)
+    return result
+  },
+  getFxTransactions: async () =>
+    (await merchantFetch<ConversionRow[]>('/merchants/me/fx-transactions')).data,
+  getApiKeys: async () => (await merchantFetch<ApiKeyRow[]>('/merchants/me/api-keys')).data,
+  getRates: async (base = 'KES') => {
+    try {
+      const res = await fetch(`${getApiUrl()}/rates?base=${base}`)
+      if (!res.ok) return null
+      const data = (await res.json()) as { base: string; rates: Record<string, number> }
+      return Object.entries(data.rates).map(([quote, rate]) => ({
+        pair: `${data.base}/${quote}`,
+        rate,
+        base: data.base,
+        quote
+      })) satisfies ExchangeRateRow[]
+    } catch {
+      return null
+    }
+  },
 
   getPaymentLinks: async () =>
     (await merchantFetch<PaymentLinkRow[]>('/payment-links')).data,
@@ -113,4 +159,11 @@ export const merchantApi = {
   getPaymentLinkPayments: async (id: string) =>
     (await merchantFetch<unknown[]>(`/payment-links/${id}/payments`)).data,
   getInvoices: async () => merchantFetch<unknown[]>('/merchants/me/invoices')
+}
+
+export async function merchantRequest<T>(
+  path: string,
+  options?: RequestInit
+): Promise<{ data: T | null; error?: string }> {
+  return merchantFetch<T>(path, options)
 }

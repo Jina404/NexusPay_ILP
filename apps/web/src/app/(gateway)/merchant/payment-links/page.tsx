@@ -15,31 +15,12 @@ import {
   type PaymentLinkRow,
   type PaymentLinkStats
 } from '@/lib/merchant-api'
-import { paymentLinks as mockLinks } from '@/lib/merchant-mock-payment-links'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { Copy, Plus } from 'lucide-react'
 
-function mapMockToRow(m: (typeof mockLinks)[0]): PaymentLinkRow {
-  return {
-    id: m.id,
-    public_id: m.publicId,
-    publicId: m.publicId,
-    title: m.title,
-    description: m.description,
-    link_type: m.linkType,
-    amount: m.amount !== null ? m.amount * 100 : null,
-    currency: m.currency,
-    status: m.status,
-    expires_at: m.expiresAt,
-    created_at: m.createdAt,
-    paymentUrl: m.paymentUrl,
-    paymentsCount: m.paymentsCount
-  }
-}
-
 export default function PaymentLinksPage() {
   const router = useRouter()
-  const [rows, setRows] = useState<PaymentLinkRow[]>(mockLinks.map(mapMockToRow))
+  const [rows, setRows] = useState<PaymentLinkRow[]>([])
   const [stats, setStats] = useState<PaymentLinkStats | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<PaymentLinkRow | null>(null)
@@ -50,7 +31,7 @@ export default function PaymentLinksPage() {
       merchantApi.getPaymentLinks(),
       merchantApi.getPaymentLinkStats('7d')
     ])
-    if (links && links.length > 0) setRows(links)
+    if (links) setRows(links)
     if (linkStats) setStats(linkStats)
   }, [])
 
