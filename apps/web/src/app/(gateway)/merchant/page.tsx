@@ -37,9 +37,12 @@ export default function MerchantDashboardPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let initial = true
     async function load() {
-      setLoading(true)
-      setError(null)
+      if (initial) {
+        setLoading(true)
+        setError(null)
+      }
       const [stats, tx, chartData, settlements] = await Promise.all([
         merchantApi.getStats(),
         merchantApi.getTransactions(),
@@ -56,9 +59,14 @@ export default function MerchantDashboardPage() {
           failed: settlements.filter((s) => s.status === 'failed').length
         })
       }
-      setLoading(false)
+      if (initial) {
+        setLoading(false)
+        initial = false
+      }
     }
     void load()
+    const interval = setInterval(() => void load(), 5000)
+    return () => clearInterval(interval)
   }, [])
 
   if (loading) return <LoadingState />

@@ -46,10 +46,11 @@ export function LandingFeaturesGrid() {
       <div className="mx-auto max-w-7xl container-pad">
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
           <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-            One Platform. Endless Possibilities.
+            The interoperability layer for local fintechs
           </h2>
           <p className="text-muted mt-3 sm:mt-4 text-base sm:text-lg px-2 sm:px-0">
-            Everything you need to accept payments, manage money, and grow your business.
+            Instead of forcing users onto international payment methods, we bring global commerce
+            to the rails they already use.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

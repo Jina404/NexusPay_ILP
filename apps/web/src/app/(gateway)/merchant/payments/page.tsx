@@ -30,12 +30,18 @@ export default function MerchantPaymentsPage() {
   const [dateTo, setDateTo] = useState('')
 
   useEffect(() => {
+    let initial = true
     async function load() {
       const payments = await merchantApi.getPayments()
       if (payments) setRows(payments)
-      setLoading(false)
+      if (initial) {
+        setLoading(false)
+        initial = false
+      }
     }
     void load()
+    const interval = setInterval(() => void load(), 5000)
+    return () => clearInterval(interval)
   }, [])
 
   const filtered = useMemo(() => {

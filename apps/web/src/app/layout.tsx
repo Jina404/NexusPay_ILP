@@ -5,8 +5,9 @@ import { getBrandLogoUrl } from '@/lib/brand-assets'
 const logoUrl = getBrandLogoUrl()
 
 export const metadata: Metadata = {
-  title: 'NexusPay — Accept payments. Settle globally.',
-  description: 'Payment gateway and settlement platform powered by Interledger',
+  title: 'NexusPay — Open Payments infrastructure for cross-border commerce',
+  description:
+    'Open Payments infrastructure platform that lets digital platforms accept cross-border payments from local payment systems through a single API.',
   icons: {
     icon: logoUrl,
     apple: logoUrl

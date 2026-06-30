@@ -147,7 +147,7 @@ export class PaymentLinkService {
 
     const { data: merchant } = await this.db
       .from('merchants')
-      .select('id, business_name, status')
+      .select('id, business_name, status, country, settlement_currency')
       .eq('id', link.merchant_id)
       .maybeSingle()
     if (!merchant || merchant.status !== 'active') return null
@@ -164,7 +164,9 @@ export class PaymentLinkService {
         expiresAt: link.expires_at
       },
       merchant: {
-        name: merchant.business_name
+        name: merchant.business_name,
+        country: merchant.country,
+        settlementCurrency: merchant.settlement_currency
       }
     }
   }

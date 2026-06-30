@@ -19,8 +19,10 @@ export function LandingFooter() {
             </Link>
           </nav>
         </div>
-        <p className="text-center text-xs text-muted mt-6 sm:mt-8 px-4">
-          © {new Date().getFullYear()} NexusPay. Payment gateway powered by Interledger.
+        <p className="text-center text-xs text-muted mt-6 sm:mt-8 px-4 max-w-2xl mx-auto">
+          The internet connected information. Interledger connects value. NexusPay connects
+          people — building the infrastructure that lets local payment systems participate in the
+          global digital economy.
         </p>
       </div>
     </footer>

@@ -17,11 +17,11 @@ export function LandingDeveloperCta() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-start">
           <div className="min-w-0">
             <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Built for Developers
+              Built for platforms
             </h2>
             <p className="text-muted mt-3 sm:mt-4 text-base sm:text-lg leading-relaxed">
-              Integrate payments in minutes with our REST API. Webhooks, idempotency keys,
-              and sandbox mode included.
+              One REST API connects your marketplace, SaaS, or trade platform to local payment
+              rails and Open Payments settlement — webhooks and sandbox included.
             </p>
             <pre className="mt-6 sm:mt-8 rounded-xl bg-slate-900 p-4 sm:p-5 overflow-x-auto text-sm leading-relaxed -mx-1 sm:mx-0">
               <code className="text-slate-300 font-mono text-xs sm:text-[13px] whitespace-pre">

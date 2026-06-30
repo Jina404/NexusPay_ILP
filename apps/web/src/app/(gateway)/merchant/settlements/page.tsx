@@ -25,12 +25,18 @@ export default function MerchantSettlementsPage() {
 
   const summary = useMemo(() => {
     const local = rows.filter((s) => s.method === 'local')
-    const crossBorder = rows.filter((s) => s.method === 'cross_border')
-    const ilp = rows.filter((s) => s.method === 'ilp')
+    const crossBorder = rows.filter((s) => s.method === 'cross_border_ilp')
+    const manual = rows.filter((s) => s.method === 'manual')
     return {
       local: { count: local.length, amount: local.reduce((s, r) => s + r.amount, 0) },
-      crossBorder: { count: crossBorder.length, amount: crossBorder.reduce((s, r) => s + r.amount, 0) },
-      ilp: { count: ilp.length, pending: ilp.filter((s) => s.status === 'pending').length }
+      crossBorder: {
+        count: crossBorder.length,
+        amount: crossBorder.reduce((s, r) => s + r.amount, 0)
+      },
+      ilp: {
+        count: crossBorder.length + manual.length,
+        pending: [...crossBorder, ...manual].filter((s) => s.status === 'pending').length
+      }
     }
   }, [rows])
 

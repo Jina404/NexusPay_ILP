@@ -6,12 +6,11 @@ import { ChevronDown, Menu, X } from 'lucide-react'
 import { NexusPayLogo } from '@/components/nexuspay-logo'
 
 const links = [
-  { label: 'Products', href: '#features', page: false },
+  { label: 'Platform', href: '#how-it-works', page: false },
   { label: 'Merchants', href: '/merchant', page: true },
   { label: 'Developers', href: '#developers', page: false },
-  { label: 'Pricing', href: '#contact', page: false },
-  { label: 'Company', href: '#contact', page: false },
-  { label: 'Resources', href: '#developers', page: false }
+  { label: 'Market', href: '#market', page: false },
+  { label: 'Company', href: '#contact', page: false }
 ]
 
 function NavItem({

@@ -13,8 +13,8 @@ const items = [
   },
   {
     icon: Zap,
-    title: 'Interledger Powered',
-    desc: 'Fast, low-cost settlement'
+    title: 'Open Payments',
+    desc: 'Interledger-powered settlement across borders'
   },
   {
     icon: Activity,

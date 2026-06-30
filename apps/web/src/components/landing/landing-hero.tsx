@@ -79,12 +79,17 @@ export function LandingHero() {
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           <div className="relative w-full text-center sm:text-left">
             <h1 className="font-display text-[1.75rem] leading-[1.15] xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight text-foreground">
-              Accept payments. Grow globally. Settle{' '}
-              <span className="text-gradient-hero">instantly.</span>
+              Local payments.{' '}
+              <span className="text-gradient-hero">Global commerce.</span>
             </h1>
             <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted max-w-xl mx-auto sm:mx-0 leading-relaxed">
-              NexusPay is the all-in-one payment gateway and settlement platform powered by
-              Interledger Protocol for seamless, borderless payments.
+              NexusPay is an Open Payments infrastructure platform. We enable digital platforms
+              to accept cross-border payments from local payment systems — M-Pesa, mobile money,
+              and more — through a single API.
+            </p>
+            <p className="mt-3 text-sm text-muted max-w-xl mx-auto sm:mx-0">
+              Payment Gateway is our first product. Tomorrow: payroll, escrow, marketplace payouts,
+              and B2B settlements on the same layer.
             </p>
             <div className="flex flex-col xs:flex-row flex-wrap gap-3 sm:gap-4 mt-8 sm:mt-10 justify-center sm:justify-start">
               <Link

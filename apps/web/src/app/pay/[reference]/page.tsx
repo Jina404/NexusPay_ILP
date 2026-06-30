@@ -29,7 +29,7 @@ interface PaymentLinkInfo {
     currency: string
     status: string
   }
-  merchant: { name: string }
+  merchant: { name: string; country?: string; settlementCurrency?: string }
 }
 
 type PageMode = 'loading' | 'link' | 'payment' | 'not_found'
@@ -45,6 +45,14 @@ export default function HostedCheckoutPage() {
   const [error, setError] = useState<string | null>(null)
   const [checkoutRef, setCheckoutRef] = useState<string | null>(null)
   const [customerMessage, setCustomerMessage] = useState<string | null>(null)
+  const [fxHint, setFxHint] = useState<string | null>(null)
+
+  const countryLabel: Record<string, string> = {
+    KE: 'Kenya',
+    UG: 'Uganda',
+    TZ: 'Tanzania',
+    US: 'United States'
+  }
 
   useEffect(() => {
     async function resolve() {
@@ -55,6 +63,31 @@ export default function HostedCheckoutPage() {
           setLinkInfo(data)
           if (data.link.linkType === 'open' && data.link.amount !== null) {
             setAmount(String(data.link.amount))
+          }
+          if (data.link.currency === 'KES' && data.merchant.settlementCurrency === 'UGX') {
+            try {
+              const ratesRes = await fetch(`${getApiUrl()}/rates?base=KES`)
+              if (ratesRes.ok) {
+                const ratesData = (await ratesRes.json()) as {
+                  rates: Record<string, number>
+                }
+                const ugxRate = ratesData.rates?.UGX
+                if (ugxRate && data.link.amount !== null) {
+                  const ugxApprox = Math.round(data.link.amount * ugxRate)
+                  setFxHint(
+                    `Cross-border payment · Merchant settles in UGX (~ ${ugxApprox.toLocaleString()} UGX)`
+                  )
+                } else if (ugxRate) {
+                  setFxHint(`Cross-border payment · 1 KES ≈ ${ugxRate} UGX via Open Payments`)
+                }
+              }
+            } catch {
+              setFxHint('Cross-border payment · Settled with Open Payments')
+            }
+          } else if (data.merchant.country && data.merchant.country !== 'KE') {
+            setFxHint(
+              `Paying ${data.merchant.name} in ${countryLabel[data.merchant.country] ?? data.merchant.country} via NexusPay`
+            )
           }
           setMode('link')
           return
@@ -173,6 +206,14 @@ export default function HostedCheckoutPage() {
             wordmarkClassName="text-xl text-accent"
           />
           <p className="text-center text-sm text-muted mb-1">{merchant.name}</p>
+          <p className="text-center text-xs text-accent mb-2">
+            Pay with NexusPay · Open Payments infrastructure
+          </p>
+          {fxHint ? (
+            <p className="text-center text-xs text-muted mb-4 px-2">{fxHint}</p>
+          ) : (
+            <div className="mb-4" />
+          )}
           <h1 className="font-display text-xl font-bold text-center mb-1">{link.title}</h1>
           {link.description ? (
             <p className="text-sm text-muted text-center mb-6">{link.description}</p>
