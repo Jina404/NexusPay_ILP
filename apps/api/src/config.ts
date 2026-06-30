@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url'
 import { z } from 'zod'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
-loadEnv({ path: resolve(__dirname, '../../../.env') })
+if (!process.env.VERCEL) {
+  loadEnv({ path: resolve(__dirname, '../../../.env') })
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/components/page-header'
 import { DataTable } from '@/components/merchant/data-table'
-import { DataError, LoadingState } from '@/components/merchant/api-key-banner'
+import { DataError, LoadingState } from '@/components/merchant/merchant-page-state'
 import { merchantApi } from '@/lib/merchant-api'
 import type { CustomerRow } from '@/lib/merchant-types'
 import { formatCurrency, formatDate } from '@/lib/utils'
@@ -18,7 +18,6 @@ export default function MerchantCustomersPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getCustomers()
-      if (!data) setError('API key not configured')
       else setRows(data)
       setLoading(false)
     }

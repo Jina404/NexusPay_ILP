@@ -22,6 +22,7 @@ import { SettlementEngine } from '../modules/settlement/service.js'
 import { FxEngine } from '../modules/fx/service.js'
 import { PaymentLinkService } from '../modules/payment-links/service.js'
 import { OrderService } from '../orders.js'
+import { requireMerchant } from '../lib/merchant-auth.js'
 
 export async function registerGatewayRoutes(app: FastifyInstance, config: AppConfig) {
   const db = createSupabase(config)
@@ -55,6 +56,10 @@ export async function registerGatewayRoutes(app: FastifyInstance, config: AppCon
 
   app.post('/merchants/:id/api-key/regenerate', async (request, reply) => {
     const { id } = request.params as { id: string }
+    if (!(await requireMerchant(request, reply, merchants, db))) return
+    if (request.merchantId !== id) {
+      return reply.code(403).send({ error: 'Forbidden' })
+    }
     try {
       const apiKey = await merchants.regenerateApiKey(id)
       return { apiKey }

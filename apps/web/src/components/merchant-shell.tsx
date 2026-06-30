@@ -67,7 +67,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'DEVELOPERS',
     items: [
-      { href: '/merchant/developers', label: 'Developers', icon: Code2 },
+      { href: '/merchant/developers', label: 'API Keys', icon: Code2 },
       { href: '/merchant/reports', label: 'Reports', icon: FileBarChart }
     ]
   },

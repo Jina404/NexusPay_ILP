@@ -8,3 +8,4 @@ dist/
 _mockup_tmp/
 _mockup_tmp.zip
 .turbo/
+.vercel

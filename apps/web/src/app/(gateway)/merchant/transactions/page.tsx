@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader } from '@/components/page-header'
 import { DataTable } from '@/components/merchant/data-table'
 import { StatusBadge } from '@/components/merchant/status-badge'
-import { DataError, LoadingState } from '@/components/merchant/api-key-banner'
+import { DataError, LoadingState } from '@/components/merchant/merchant-page-state'
 import { merchantApi } from '@/lib/merchant-api'
 import type { TransactionRow } from '@/lib/merchant-types'
 import { formatCurrency, formatDate, cn } from '@/lib/utils'
@@ -20,7 +20,6 @@ export default function MerchantTransactionsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getTransactions()
-      if (!data) setError('API key not configured')
       else setRows(data)
       setLoading(false)
     }

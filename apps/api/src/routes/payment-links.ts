@@ -19,7 +19,7 @@ export async function registerPaymentLinkRoutes(
   const paymentLinks = new PaymentLinkService(db, config, app.log)
 
   app.post('/payment-links', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const parsed = createPaymentLinkSchema.safeParse(request.body)
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() })
     try {
@@ -35,7 +35,7 @@ export async function registerPaymentLinkRoutes(
   })
 
   app.get('/payment-links', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     try {
       return await paymentLinks.list(request.merchantId!)
     } catch (err) {
@@ -44,7 +44,7 @@ export async function registerPaymentLinkRoutes(
   })
 
   app.get('/payment-links/stats', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const range = (request.query as { range?: string }).range
     const rangeDays = range === '30d' ? 30 : 7
     try {
@@ -55,7 +55,7 @@ export async function registerPaymentLinkRoutes(
   })
 
   app.get('/payment-links/:id', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { id } = request.params as { id: string }
     try {
       const link = await paymentLinks.getById(request.merchantId!, id)
@@ -67,7 +67,7 @@ export async function registerPaymentLinkRoutes(
   })
 
   app.patch('/payment-links/:id', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { id } = request.params as { id: string }
     const parsed = updatePaymentLinkSchema.safeParse(request.body)
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() })
@@ -79,7 +79,7 @@ export async function registerPaymentLinkRoutes(
   })
 
   app.post('/payment-links/:id/disable', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { id } = request.params as { id: string }
     try {
       return await paymentLinks.disable(request.merchantId!, id)
@@ -89,7 +89,7 @@ export async function registerPaymentLinkRoutes(
   })
 
   app.get('/payment-links/:id/payments', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { id } = request.params as { id: string }
     try {
       return await paymentLinks.listPayments(request.merchantId!, id)

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { PageHeader } from '@/components/page-header'
 import { StatCard } from '@/components/stat-card'
-import { DataError, LoadingState } from '@/components/merchant/api-key-banner'
+import { DataError, LoadingState } from '@/components/merchant/merchant-page-state'
 import { merchantApi } from '@/lib/merchant-api'
 import type { WalletRow } from '@/lib/merchant-types'
 import { formatCurrency } from '@/lib/utils'
@@ -16,7 +16,6 @@ export default function MerchantWalletsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getWallets()
-      if (!data) setError('API key not configured')
       else setWallets(data)
       setLoading(false)
     }

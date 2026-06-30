@@ -1,14 +1,8 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify'
 import type { AppConfig } from '../config.js'
 import { createSupabase } from '../db.js'
-import { requireMerchant } from '../lib/merchant-auth.js'
+import { requireMerchant, requireUser } from '../lib/merchant-auth.js'
 import { MerchantService } from '../modules/merchants/service.js'
-
-declare module 'fastify' {
-  interface FastifyRequest {
-    merchantId?: string
-  }
-}
 
 export async function registerMerchantDashboardRoutes(
   app: FastifyInstance,
@@ -18,14 +12,14 @@ export async function registerMerchantDashboardRoutes(
   const merchants = new MerchantService(db)
 
   app.get('/merchants/me', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const merchant = await merchants.getById(request.merchantId!)
     if (!merchant) return reply.code(404).send({ error: 'Not found' })
     return merchant
   })
 
   app.get('/merchants/me/stats', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const merchantId = request.merchantId!
 
     const [paymentsRes, settlementsRes, walletsRes] = await Promise.all([
@@ -54,7 +48,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/payments', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { data, error } = await db
       .from('payments')
       .select('id, amount, currency, status, payment_method, customer_email, customer_phone, checkout_reference, created_at')
@@ -75,7 +69,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/transactions', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const merchantId = request.merchantId!
 
     const [payments, payouts, settlements, fxTx] = await Promise.all([
@@ -128,7 +122,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/wallets', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { data, error } = await db
       .from('wallets')
       .select('currency, balance')
@@ -144,7 +138,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/settlements', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { data, error } = await db
       .from('settlements')
       .select('*')
@@ -164,7 +158,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/payouts', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { data, error } = await db
       .from('payouts')
       .select('*')
@@ -184,7 +178,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/refunds', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const merchantId = request.merchantId!
     const { data: paymentIds } = await db
       .from('payments')
@@ -216,7 +210,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/escrows', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { data, error } = await db
       .from('escrows')
       .select('*')
@@ -235,7 +229,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/customers', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const merchantId = request.merchantId!
 
     const [customersRes, paymentsRes] = await Promise.all([
@@ -272,7 +266,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/customers/:id', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { id } = request.params as { id: string }
     const merchantId = request.merchantId!
 
@@ -315,7 +309,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/fx-transactions', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { data, error } = await db
       .from('fx_transactions')
       .select('*')
@@ -335,7 +329,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/dashboard-charts', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const merchantId = request.merchantId!
     const since = new Date()
     since.setDate(since.getDate() - 6)
@@ -389,7 +383,7 @@ export async function registerMerchantDashboardRoutes(
   })
 
   app.get('/merchants/me/api-keys', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const { data, error } = await db
       .from('merchant_api_keys')
       .select('id, name, key_prefix, last_used_at, created_at, revoked_at')
@@ -403,5 +397,48 @@ export async function registerMerchantDashboardRoutes(
       createdAt: k.created_at,
       lastUsed: k.last_used_at
     }))
+  })
+
+  app.post('/merchants/me/api-keys/regenerate', async (request, reply) => {
+    if (!(await requireMerchant(request, reply, merchants, db))) return
+    try {
+      const apiKey = await merchants.regenerateApiKey(request.merchantId!)
+      return { apiKey }
+    } catch (err) {
+      return reply.code(400).send({ error: err instanceof Error ? err.message : 'Failed' })
+    }
+  })
+
+  app.post('/merchants/me/bootstrap', async (request, reply) => {
+    const user = await requireUser(request, reply, db)
+    if (!user) return
+
+    const existing = await merchants.getByUserId(user.id)
+    if (existing) {
+      return { merchant: existing, created: false }
+    }
+
+    const { data: profile } = await db
+      .from('profiles')
+      .select('business_name, phone, country')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!user.email) {
+      return reply.code(400).send({ error: 'User email is required to create a merchant account' })
+    }
+
+    try {
+      const result = await merchants.register({
+        businessName: profile?.business_name ?? user.email.split('@')[0] ?? 'Merchant',
+        email: user.email,
+        phone: profile?.phone ?? undefined,
+        country: profile?.country ?? 'KE',
+        userId: user.id
+      })
+      return { merchant: result.merchant, created: true, apiKey: result.apiKey }
+    } catch (err) {
+      return reply.code(400).send({ error: err instanceof Error ? err.message : 'Failed' })
+    }
   })
 }

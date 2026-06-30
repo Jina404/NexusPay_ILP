@@ -6,7 +6,7 @@ import { SectionTabs } from '@/components/merchant/section-tabs'
 import { DataTable } from '@/components/merchant/data-table'
 import { StatusBadge } from '@/components/merchant/status-badge'
 import { Button } from '@/components/ui/button'
-import { DataError, LoadingState } from '@/components/merchant/api-key-banner'
+import { DataError, LoadingState } from '@/components/merchant/merchant-page-state'
 import { merchantApi } from '@/lib/merchant-api'
 import type { PayoutRow } from '@/lib/merchant-types'
 import { formatCurrency, formatDate } from '@/lib/utils'
@@ -29,7 +29,6 @@ export default function MerchantPayoutsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getPayouts()
-      if (!data) setError('API key not configured')
       else setRows(data)
       setLoading(false)
     }

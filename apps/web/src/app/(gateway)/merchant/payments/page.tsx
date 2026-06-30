@@ -6,7 +6,7 @@ import { SectionTabs } from '@/components/merchant/section-tabs'
 import { FilterBar } from '@/components/merchant/filter-bar'
 import { DataTable } from '@/components/merchant/data-table'
 import { StatusBadge } from '@/components/merchant/status-badge'
-import { DataError, LoadingState } from '@/components/merchant/api-key-banner'
+import { DataError, LoadingState } from '@/components/merchant/merchant-page-state'
 import { merchantApi } from '@/lib/merchant-api'
 import type { PaymentRow } from '@/lib/merchant-types'
 import { formatCurrency, formatDate } from '@/lib/utils'
@@ -32,7 +32,6 @@ export default function MerchantPaymentsPage() {
   useEffect(() => {
     async function load() {
       const payments = await merchantApi.getPayments()
-      if (!payments) setError('API key not configured')
       else setRows(payments)
       setLoading(false)
     }

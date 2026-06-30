@@ -107,6 +107,20 @@ export default function SignupPage() {
       /* wallet provisioning is optional during onboarding */
     }
 
+    if (data.session?.access_token) {
+      try {
+        await fetch(`${getApiUrl()}/merchants/me/bootstrap`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+      } catch {
+        /* merchant bootstrap runs again on dashboard load */
+      }
+    }
+
     router.refresh()
     router.push('/merchant')
   }

@@ -1,4 +1,4 @@
-import { getApiUrl } from '@/lib/supabase'
+import { createClient, getApiUrl } from '@/lib/supabase'
 import type {
   ApiKeyRow,
   ConversionRow,
@@ -15,41 +15,48 @@ import type {
   WalletRow
 } from '@/lib/merchant-types'
 
-const API_KEY_STORAGE = 'nexuspay_api_key'
-
-export function getStoredApiKey(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(API_KEY_STORAGE)
+async function getAccessToken(): Promise<string | null> {
+  const supabase = createClient()
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
+  return session?.access_token ?? null
 }
 
-export function setStoredApiKey(key: string) {
-  localStorage.setItem(API_KEY_STORAGE, key)
-}
-
-export function clearStoredApiKey() {
-  localStorage.removeItem(API_KEY_STORAGE)
+function redirectToLogin() {
+  if (typeof window === 'undefined') return
+  const next = encodeURIComponent(window.location.pathname)
+  window.location.href = `/login?next=${next}`
 }
 
 async function merchantFetch<T>(
   path: string,
   options?: RequestInit
 ): Promise<{ data: T | null; error?: string }> {
-  const apiKey = getStoredApiKey()
-  if (!apiKey) return { data: null, error: 'API key not configured' }
+  const token = await getAccessToken()
+  if (!token) {
+    redirectToLogin()
+    return { data: null, error: 'Not authenticated' }
+  }
 
   try {
     const res = await fetch(`${getApiUrl()}${path}`, {
       ...options,
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         ...options?.headers
       }
     })
+    if (res.status === 401) {
+      redirectToLogin()
+      return { data: null, error: 'Not authenticated' }
+    }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
       return { data: null, error: (body as { error?: string }).error ?? res.statusText }
     }
+    if (res.status === 204) return { data: null }
     return { data: (await res.json()) as T }
   } catch {
     return { data: null, error: 'Network error' }
@@ -103,6 +110,12 @@ export interface CustomerDetail extends CustomerRow {
 }
 
 export const merchantApi = {
+  bootstrap: async () =>
+    merchantFetch<{ merchant: Record<string, unknown>; created: boolean; apiKey?: string }>(
+      '/merchants/me/bootstrap',
+      { method: 'POST' }
+    ),
+
   getMe: async () => (await merchantFetch<Record<string, unknown>>('/merchants/me')).data,
   getStats: async () => (await merchantFetch<DashboardMetrics>('/merchants/me/stats')).data,
   getDashboardCharts: async () =>
@@ -124,6 +137,8 @@ export const merchantApi = {
   getFxTransactions: async () =>
     (await merchantFetch<ConversionRow[]>('/merchants/me/fx-transactions')).data,
   getApiKeys: async () => (await merchantFetch<ApiKeyRow[]>('/merchants/me/api-keys')).data,
+  regenerateApiKey: async () =>
+    merchantFetch<{ apiKey: string }>('/merchants/me/api-keys/regenerate', { method: 'POST' }),
   getRates: async (base = 'KES') => {
     try {
       const res = await fetch(`${getApiUrl()}/rates?base=${base}`)

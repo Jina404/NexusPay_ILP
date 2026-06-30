@@ -72,7 +72,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   const client = mpesa.getClient()
 
   app.post('/daraja/b2c', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const parsed = b2cSchema.safeParse(request.body)
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() })
     try {
@@ -84,7 +84,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   })
 
   app.post('/daraja/b2b', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const parsed = b2bSchema.safeParse(request.body)
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() })
     try {
@@ -95,7 +95,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   })
 
   app.post('/daraja/reversal', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const parsed = reversalSchema.safeParse(request.body)
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() })
     try {
@@ -106,7 +106,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   })
 
   app.post('/daraja/c2b/register', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const version = (request.body as { version?: 'v1' | 'v2' }).version ?? 'v2'
     try {
       return await client.c2bRegisterUrl(version)
@@ -116,7 +116,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   })
 
   app.post('/daraja/transaction-status', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const parsed = transactionStatusSchema.safeParse(request.body)
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() })
     try {
@@ -127,7 +127,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   })
 
   app.post('/daraja/account-balance', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     try {
       return await client.accountBalanceQuery()
     } catch (err) {
@@ -136,7 +136,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   })
 
   app.post('/daraja/qrcode', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     const parsed = qrSchema.safeParse(request.body)
     if (!parsed.success) return reply.code(400).send({ error: parsed.error.flatten() })
     try {
@@ -250,7 +250,7 @@ export async function registerDarajaRoutes(app: FastifyInstance, config: AppConf
   })
 
   app.get('/merchants/me/invoices', async (request, reply) => {
-    if (!(await requireMerchant(request, reply, merchants))) return
+    if (!(await requireMerchant(request, reply, merchants, db))) return
     return invoices.listForMerchant(request.merchantId!)
   })
 }

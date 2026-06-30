@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader } from '@/components/page-header'
 import { DataTable } from '@/components/merchant/data-table'
 import { StatusBadge } from '@/components/merchant/status-badge'
-import { DataError, LoadingState } from '@/components/merchant/api-key-banner'
+import { DataError, LoadingState } from '@/components/merchant/merchant-page-state'
 import { merchantApi } from '@/lib/merchant-api'
 import type { SettlementRow } from '@/lib/merchant-types'
 import { formatCurrency, formatDate } from '@/lib/utils'
@@ -17,7 +17,6 @@ export default function MerchantSettlementsPage() {
   useEffect(() => {
     async function load() {
       const data = await merchantApi.getSettlements()
-      if (!data) setError('API key not configured')
       else setRows(data)
       setLoading(false)
     }

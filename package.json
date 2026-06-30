@@ -4,6 +4,7 @@
   "scripts": {
     "preinstall": "node -e \"try{require('child_process').execSync('pnpm -v',{stdio:'pipe'})}catch(e){console.warn('\\npnpm not found. Run: npm install -g pnpm@9.15.0\\nOr use: npx pnpm@9.15.0 install\\n')}\"",
     "build": "pnpm -r build",
+    "build:vercel-api": "pnpm --filter @nexuspay/shared build && pnpm --filter @nexuspay/mpesa build && pnpm --filter @nexuspay/rafiki-client build && pnpm --filter @nexuspay/api build",
     "dev": "pnpm --parallel --filter @nexuspay/api --filter @nexuspay/web dev",
     "dev:api": "pnpm --filter @nexuspay/api dev",
     "dev:web": "pnpm --filter @nexuspay/web dev",

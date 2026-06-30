@@ -1,11 +1,10 @@
 import { MerchantShell } from '@/components/merchant-shell'
-import { ApiKeyBanner } from '@/components/merchant/api-key-banner'
+import { MerchantSessionProvider } from '@/components/merchant/merchant-bootstrap'
 
 export default function MerchantLayout({ children }: { children: React.ReactNode }) {
   return (
     <MerchantShell>
-      <ApiKeyBanner />
-      {children}
+      <MerchantSessionProvider>{children}</MerchantSessionProvider>
     </MerchantShell>
   )
 }

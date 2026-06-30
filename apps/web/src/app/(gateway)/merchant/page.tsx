@@ -7,7 +7,7 @@ import { MetricGrid } from '@/components/merchant/metric-grid'
 import { BarChartPlaceholder, DonutChartPlaceholder } from '@/components/merchant/chart-placeholder'
 import { DataTable } from '@/components/merchant/data-table'
 import { StatusBadge } from '@/components/merchant/status-badge'
-import { DataError, LoadingState } from '@/components/merchant/api-key-banner'
+import { DataError, LoadingState } from '@/components/merchant/merchant-page-state'
 import { merchantApi } from '@/lib/merchant-api'
 import type { DashboardCharts, DashboardMetrics, TransactionRow } from '@/lib/merchant-types'
 import { formatCurrency, formatDate } from '@/lib/utils'
@@ -56,7 +56,6 @@ export default function MerchantDashboardPage() {
           failed: settlements.filter((s) => s.status === 'failed').length
         })
       }
-      if (!stats && !tx) setError('API key not configured')
       setLoading(false)
     }
     void load()
