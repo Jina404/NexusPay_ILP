@@ -114,7 +114,8 @@ export default function SignupPage() {
           headers: {
             Authorization: `Bearer ${data.session.access_token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          body: '{}'
         })
       } catch {
         /* merchant bootstrap runs again on dashboard load */

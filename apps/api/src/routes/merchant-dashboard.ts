@@ -413,30 +413,16 @@ export async function registerMerchantDashboardRoutes(
     const user = await requireUser(request, reply, db)
     if (!user) return
 
-    const existing = await merchants.getByUserId(user.id)
-    if (existing) {
-      return { merchant: existing, created: false }
-    }
-
-    const { data: profile } = await db
-      .from('profiles')
-      .select('business_name, phone, country')
-      .eq('id', user.id)
-      .maybeSingle()
-
     if (!user.email) {
       return reply.code(400).send({ error: 'User email is required to create a merchant account' })
     }
 
     try {
-      const result = await merchants.register({
-        businessName: profile?.business_name ?? user.email.split('@')[0] ?? 'Merchant',
-        email: user.email,
-        phone: profile?.phone ?? undefined,
-        country: profile?.country ?? 'KE',
-        userId: user.id
+      const result = await merchants.ensureForUser({
+        userId: user.id,
+        email: user.email
       })
-      return { merchant: result.merchant, created: true, apiKey: result.apiKey }
+      return result
     } catch (err) {
       return reply.code(400).send({ error: err instanceof Error ? err.message : 'Failed' })
     }

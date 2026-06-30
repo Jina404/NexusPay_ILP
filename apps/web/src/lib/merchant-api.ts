@@ -29,9 +29,18 @@ function redirectToLogin() {
   window.location.href = `/login?next=${next}`
 }
 
+function withJsonBody(options?: RequestInit): RequestInit {
+  const method = (options?.method ?? 'GET').toUpperCase()
+  if (['POST', 'PUT', 'PATCH'].includes(method) && options?.body == null) {
+    return { ...options, body: '{}' }
+  }
+  return options ?? {}
+}
+
 async function merchantFetch<T>(
   path: string,
-  options?: RequestInit
+  options?: RequestInit,
+  retried = false
 ): Promise<{ data: T | null; error?: string }> {
   const token = await getAccessToken()
   if (!token) {
@@ -40,12 +49,13 @@ async function merchantFetch<T>(
   }
 
   try {
+    const requestOptions = withJsonBody(options)
     const res = await fetch(`${getApiUrl()}${path}`, {
-      ...options,
+      ...requestOptions,
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        ...options?.headers
+        ...requestOptions.headers
       }
     })
     if (res.status === 401) {
@@ -54,7 +64,27 @@ async function merchantFetch<T>(
     }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
-      return { data: null, error: (body as { error?: string }).error ?? res.statusText }
+      const message = (body as { error?: string }).error ?? res.statusText
+
+      if (
+        !retried &&
+        res.status === 403 &&
+        message.toLowerCase().includes('no merchant account linked')
+      ) {
+        const boot = await fetch(`${getApiUrl()}/merchants/me/bootstrap`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: '{}'
+        })
+        if (boot.ok) {
+          return merchantFetch<T>(path, options, true)
+        }
+      }
+
+      return { data: null, error: message }
     }
     if (res.status === 204) return { data: null }
     return { data: (await res.json()) as T }

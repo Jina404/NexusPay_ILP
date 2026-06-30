@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
+import { createClient, getApiUrl } from '@/lib/supabase'
 import { tryDevSignIn, isDevAuthEnabled, DEV_CREDENTIALS } from '@/lib/dev-auth'
 import { isSupabaseConfigured, SUPABASE_SETUP_HINT } from '@/lib/supabase-config'
 import { Button } from '@/components/ui/button'
@@ -53,6 +53,25 @@ export default function LoginPage() {
       setError(authError.message)
       return
     }
+
+    const {
+      data: { session }
+    } = await supabase.auth.getSession()
+    if (session?.access_token) {
+      try {
+        await fetch(`${getApiUrl()}/merchants/me/bootstrap`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: '{}'
+        })
+      } catch {
+        /* dashboard bootstrap runs again on /merchant load */
+      }
+    }
+
     router.refresh()
     router.push('/merchant')
   }

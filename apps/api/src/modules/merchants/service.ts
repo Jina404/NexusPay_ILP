@@ -85,6 +85,91 @@ export class MerchantService {
     return { merchant: merchant as Merchant, apiKey }
   }
 
+  async getByEmail(email: string): Promise<Merchant | null> {
+    const { data, error } = await this.db
+      .from('merchants')
+      .select('*')
+      .eq('email', email.trim().toLowerCase())
+      .maybeSingle()
+    if (error) throw error
+    return data as Merchant | null
+  }
+
+  async linkUserToMerchant(
+    userId: string,
+    merchantId: string,
+    role: 'owner' | 'admin' = 'owner'
+  ): Promise<void> {
+    const { error: linkError } = await this.db.from('merchant_users').upsert(
+      {
+        merchant_id: merchantId,
+        user_id: userId,
+        role
+      },
+      { onConflict: 'merchant_id,user_id' }
+    )
+    if (linkError) throw linkError
+
+    await this.db.from('profiles').update({ merchant_id: merchantId }).eq('id', userId)
+  }
+
+  async ensureForUser(input: {
+    userId: string
+    email: string
+    businessName?: string
+    phone?: string
+    country?: string
+  }): Promise<{ merchant: Merchant; created: boolean; apiKey?: string }> {
+    const existing = await this.getByUserId(input.userId)
+    if (existing) return { merchant: existing, created: false }
+
+    let { data: profile } = await this.db
+      .from('profiles')
+      .select('merchant_id, business_name, phone, country')
+      .eq('id', input.userId)
+      .maybeSingle()
+
+    if (!profile) {
+      await this.db.from('profiles').upsert({
+        id: input.userId,
+        role: 'seller',
+        country: input.country ?? 'KE',
+        phone: input.phone ?? null,
+        business_name: input.businessName ?? input.email.split('@')[0] ?? 'Merchant'
+      })
+      const refreshed = await this.db
+        .from('profiles')
+        .select('merchant_id, business_name, phone, country')
+        .eq('id', input.userId)
+        .maybeSingle()
+      profile = refreshed.data
+    }
+
+    if (profile?.merchant_id) {
+      const merchant = await this.getById(profile.merchant_id)
+      if (merchant) {
+        await this.linkUserToMerchant(input.userId, merchant.id)
+        return { merchant, created: false }
+      }
+    }
+
+    const byEmail = await this.getByEmail(input.email)
+    if (byEmail) {
+      await this.linkUserToMerchant(input.userId, byEmail.id)
+      return { merchant: byEmail, created: false }
+    }
+
+    const result = await this.register({
+      businessName:
+        input.businessName ?? profile?.business_name ?? input.email.split('@')[0] ?? 'Merchant',
+      email: input.email,
+      phone: input.phone ?? profile?.phone ?? undefined,
+      country: input.country ?? profile?.country ?? 'KE',
+      userId: input.userId
+    })
+    return { merchant: result.merchant, created: true, apiKey: result.apiKey }
+  }
+
   async getByUserId(userId: string): Promise<Merchant | null> {
     const { data: link, error } = await this.db
       .from('merchant_users')
